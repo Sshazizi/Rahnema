@@ -1,0 +1,1044 @@
+openapi: 3.0.0
+
+info:
+  title: Mirzagram API
+  version: 1.0.0
+  description: APIs for Mirzagram.
+
+tags:
+  - name: Auth
+    description: Operations related to user authentication.
+  - name: Upload File
+    description: Operations related to file uploads
+  - name: CDN
+    description: Operations related to retrieving `files` / `images` / `videos` from server
+
+security:
+  - BearerAuth:
+      - read
+      - write
+servers:
+  - url: /api   
+paths:
+  /auth/sign-up:
+    post:
+      summary: Signup new user
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SignupDTO"
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#components/schemas/ApiResponse"
+                  - type: object
+                    properties:
+                      result:
+                        type: object
+                        properties:
+                          accessToken:
+                            type: string
+  /auth/sign-in:
+    post:
+      summary: Signin user
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SigninDTO"
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#components/schemas/ApiResponse"
+                  - type: object
+                    properties:
+                      result:
+                        type: object
+                        properties:
+                          accessToken:
+                            type: string
+  /auth/forgot-password:
+    post:
+      summary: Request forget password email for user
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ForgotPasswordDTO"
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#components/schemas/ApiResponse"
+                  - type: object
+  /auth/reset-password:
+    post:
+      summary: Reset user password using forget token
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResetPasswordDTO"
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#components/schemas/ApiResponse"
+                  - type: object
+  /profile:
+    get:
+      summary: get own profile and other user profile
+      tags: [Profile]
+      parameters:
+        - name: username
+          in: query
+          description: The username of the user
+          schema:
+            type: string
+            nullable: true
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#components/schemas/ApiResponse"
+                  - type: object
+                    properties:
+                      result:
+                        $ref: "#components/schemas/ProfileResponseDTO"
+
+    put:
+      summary: update profile
+      tags: [Profile]
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProfileRequestDTO"
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#components/schemas/ApiResponse"
+                  - type: object
+  /follow/follow:
+    post:
+      summary: follow user
+      tags: [Follow]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FollowRequestDTO"
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#components/schemas/ApiResponse"
+                  - type: object
+  /follow/unfollow:
+    post:
+      summary: unfollow user
+      tags: [Follow]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FollowRequestDTO"
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#components/schemas/ApiResponse"
+                  - type: object
+  /follow/following:
+    get:
+      summary: get following user
+      tags: [Follow]
+      parameters:
+        - name: username
+          in: query
+          description: The username of the user
+          schema:
+            type: string
+            nullable: true
+        - name: page
+          in: query
+          description: The number of page
+          schema:
+            type: string
+        - name: pagelimit
+          in: query
+          description: The array length
+          schema:
+            type: string
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#components/schemas/ApiResponse"
+                  - type: array
+                    items:
+                      $ref: "#/components/schemas/FollowResponseDTO"
+  /follow/follower:
+    get:
+      summary: get follower user
+      tags: [Follow]
+      parameters:
+        - name: username
+          in: query
+          description: The username of the user
+          schema:
+            type: string
+            nullable: true
+        - name: page
+          in: query
+          description: The number of page
+          schema:
+            type: string
+        - name: pagelimit
+          in: query
+          description: The array length
+          schema:
+            type: string
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#components/schemas/ApiResponse"
+                  - type: array
+                    items:
+                      $ref: "#/components/schemas/FollowResponseDTO"
+  /explore:
+    get:
+      summary: get explore posts
+      tags: [Explore]
+      parameters:
+        - name: page
+          in: query
+          description: The number of page
+          schema:
+            type: string
+        - name: pagelimit
+          in: query
+          description: The array length
+          schema:
+            type: string
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#components/schemas/ApiResponse"
+                  - type: array
+                    items:
+                      $ref: "#/components/schemas/ExploreResponseDTO"
+  # add jwt auth for this please
+  /upload:
+    post:
+      summary: Upload file
+      tags: [Upload File]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                type:
+                  type: string
+                  enum: [post, profile]
+                file:
+                  type: string
+                  format: binary
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#components/schemas/UploadResponce"
+                  - type: object
+  /cdn/{type}/{filename}:
+    get:
+      tags: [CDN]
+      summary: Retrieve a file by type and filename
+      description: Get a file from the specified type directory by its filename.
+      parameters:
+        - in: path
+          name: type
+          required: true
+          schema:
+            type: string
+            enum: [profiles, post, others]
+          description: The type of the file (e.g., profiles, post, others)
+        - in: path
+          name: filename
+          required: true
+          schema:
+            type: string
+          description: The name of the file to retrieve
+      responses:
+        "200":
+          description: Successfully retrieved the file
+          content:
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+            image/png:
+              schema:
+                type: string
+                format: binary
+            image/webp:
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: File not found
+
+  # Post
+  /post:
+    get:
+      summary: Get all posts for user
+      tags: [Post]
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#components/schemas/ApiResponse"
+                  - type: object
+                    properties:
+                      result:
+                        $ref: "#components/schemas/PostSummaryDTO"
+    post:
+      summary: Create new post
+      tags: [Post]
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePostRequestDTO"
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#components/schemas/ApiResponse"
+                  - type: object
+                    properties:
+                      result:
+                        type: string
+  /post/{id}:
+    get:
+      summary: Get post details
+      tags: [Post]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: The id of the post to retrieve
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#components/schemas/ApiResponse"
+                  - type: object
+                    properties:
+                      result:
+                        $ref: "#components/schemas/PostDTO"
+    post:
+      summary: Edit existing post
+      tags: [Post]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePostRequestDTO"
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: The id of the post to edit
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#components/schemas/ApiResponse"
+                  - type: object
+                    properties:
+                      result:
+                        type: string
+  /post/like:
+    get:
+      summary: Get likes for post
+      tags: [Post]
+      parameters:
+        - in: query
+          name: postId
+          schema:
+            type: integer
+          required: true
+          description: Post id
+        - in: query
+          name: page
+          schema:
+            type: integer
+          required: true
+          description: Page number
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+          required: true
+          description: Page size
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#components/schemas/ApiResponse"
+                  - type: object
+                    properties:
+                      result:
+                        $ref: "#components/schemas/PostLikesResponseDTO"
+    post:
+      summary: Like a post
+      tags: [Post]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostLikeRequestDTO"
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#components/schemas/ApiResponse"
+                  - type: object
+    delete:
+      summary: Unlike a post
+      tags: [Post]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostLikeRequestDTO"
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#components/schemas/ApiResponse"
+                  - type: object
+  # Comment
+  /comment:
+    get:
+      summary: Get comments for post
+      tags: [Comment]
+      parameters:
+        - in: query
+          name: postId
+          schema:
+            type: integer
+          required: true
+          description: Post id
+        - in: query
+          name: page
+          schema:
+            type: integer
+          required: true
+          description: Page number
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+          required: true
+          description: Page size
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#components/schemas/ApiResponse"
+                  - type: object
+                    properties:
+                      result:
+                        $ref: "#components/schemas/CommentResponseDTO"
+    post:
+      summary: Create new comment
+      tags: [Comment]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCommentRequestDTO"
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#components/schemas/ApiResponse"
+                  - type: object
+  /comment/{id}:
+    get:
+      summary: Get comment details
+      tags: [Comment]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: The id of the comment to retrieve
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#components/schemas/ApiResponse"
+                  - type: object
+                    properties:
+                      result:
+                        $ref: "#/components/schemas/CommentResponseDTO"
+  /comment/{id}/like:
+    post:
+      summary: Like a comment
+      tags: [Comment]
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#components/schemas/ApiResponse"
+                  - type: object
+  /bookmark:
+    get:
+      summary: Get bookmarks for profile
+      tags: [Bookmark]
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#components/schemas/ApiResponse"
+                  - type: object
+                    properties:
+                      result:
+                        $ref: "#components/schemas/BookmarkResponseDTO"
+    post:
+      summary: Bookmark a post
+      tags: [Bookmark]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BookmarkRequestDTO"
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#components/schemas/ApiResponse"
+                  - type: object
+    delete:
+      summary: Delete bookmark
+      tags: [Bookmark]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BookmarkRequestDTO"
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#components/schemas/ApiResponse"
+                  - type: object
+  /notification:
+    get:
+      summary: Get notifications for profile
+      tags: [Notification]
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#components/schemas/ApiResponse"
+                  - type: object
+                    properties:
+                      result:
+                        $ref: "#components/schemas/NotificationDTO"
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    UploadResponce:
+      type: object
+      properties:
+        isSuccess:
+          type: boolean
+        statusCode:
+          type: number
+        result:
+          type: object
+          properties:
+            fileName:
+              type: string
+            paths:
+              type: string
+            timeCreated:
+              type: string
+            uploadType:
+              type: string
+              enum:
+                - post
+                - profile
+                - other
+        messages:
+          type: array
+    ApiResponse:
+      type: object
+      properties:
+        isSuccess:
+          type: boolean
+        statusCode:
+          type: number
+        result:
+          type: object
+        messages:
+          type: array
+    SignupDTO:
+      type: object
+      required:
+        - username
+        - email
+        - password
+        - confirmPassword
+      properties:
+        username:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        confirmPassword:
+          type: string
+    SigninDTO:
+      type: object
+      required:
+        - identifier
+        - password
+      properties:
+        identifier:
+          type: string
+        password:
+          type: string
+    ResetPasswordDTO:
+      type: object
+      required:
+        - token
+        - password
+        - confirmPassword
+      properties:
+        token:
+          type: string
+        password:
+          type: string
+        confirmPassword:
+          type: string
+    ForgotPasswordDTO:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+    ProfileRequestDTO:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        confirmPassword:
+          type: string
+        isPrivate:
+          type: boolean
+        bio:
+          type: string
+        profilePicture:
+          type: string
+    ProfileResponseDTO:
+      type: object
+      properties:
+        id:
+          type: number
+        username:
+          type: string
+        firstName:
+          type: string
+          nullable: true
+        lastName:
+          type: string
+          nullable: true
+        email:
+          type: string
+        isPrivate:
+          type: boolean
+        bio:
+          type: string
+          nullable: true
+        profilePicture:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+        postCount:
+          type: number
+        followerCount:
+          type: number
+        followingCount:
+          type: number
+    FollowResponseDTO:
+      type: object
+      properties:
+        username:
+          type: string
+        firstName:
+          type: string
+          nullable: true
+        lastName:
+          type: string
+          nullable: true
+        email:
+          type: string
+        isPrivate:
+          type: boolean
+        bio:
+          type: string
+          nullable: true
+        profilePicture:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+    GetFollow:
+      type: array
+      items:
+        type: object
+    ExploreResponseDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        contents:
+          type: array
+        likeCount:
+          type: number
+        bookmarkCount:
+          type: number
+        commentCount:
+          type: number
+        ownerProfilePicture:
+          type: string
+          nullable: true
+        firstName:
+          type: string
+          nullable: true
+        lastName:
+          type: string
+          nullable: true
+        followerCount:
+          type: number
+    FollowRequestDTO:
+      type: object
+      properties:
+        followingUserName:
+          type: string
+    UploadDTO:
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          enum: [post, profile]
+    PostSummaryDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        createdAt:
+          type: string
+        thumbnail:
+          type: object
+          $ref: "#components/schemas/ContentDTO"
+    ContentDTO:
+      type: object
+      properties:
+        url:
+          type: string
+    CreatePostRequestDTO:
+      type: object
+      required:
+        - fileNames
+        - caption
+        - mentions
+      properties:
+        fileNames:
+          type: array
+          items:
+            type: string
+        caption:
+          type: string
+        mentions:
+          type: array
+          items:
+            type: string
+    PostDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        ownerProfileId:
+          type: string
+        createdAt:
+          type: string
+        caption:
+          type: string
+        likeCount:
+          type: number
+        hashtags:
+          type: array
+          items:
+            type: object
+            $ref: "#/components/schemas/HashtagDTO"
+        mentions:
+          type: array
+          items:
+            type: object
+            $ref: "#/components/schemas/MentionDTO"
+        contents:
+          type: array
+          items:
+            type: object
+            $ref: "#/components/schemas/ContentDTO"
+    HashtagDTO:
+      type: object
+      properties:
+        tag:
+          type: string
+    MentionDTO:
+      type: object
+      properties:
+        username:
+          type: string
+    CommentResponseDTO:
+      type: object
+      properties:
+        page:
+          type: number
+        data:
+          type: object
+          properties:
+            id:
+              type: string
+            text:
+              type: string
+            postId:
+              type: string
+            author:
+              type: object
+              properties:
+                displayName:
+                  type: string
+            likeCount:
+              type: number
+            replies:
+              type: object
+              properties:
+                id:
+                  type: string
+                text:
+                  type: string
+                postId:
+                  type: string
+                author:
+                  type: object
+                  properties:
+                    displayName:
+                      type: string
+    CreateCommentRequestDTO:
+      type: object
+      required:
+        - postId
+        - text
+      properties:
+        postId:
+          type: string
+        text:
+          type: string
+        parentCommentId:
+          type: string
+    BookmarkResponseDTO:
+      type: object
+      properties:
+        id:
+          type: number
+        createdAt:
+          type: string
+        post:
+          type: object
+          properties:
+            id:
+              type: number
+            thumbnail:
+              type: string
+    BookmarkRequestDTO:
+      type: object
+      required:
+        - postId
+      properties:
+        postId:
+          type: string
+    PostLikeRequestDTO:
+      type: object
+      required:
+        - postId
+      properties:
+        postId:
+          type: string
+    PostLikesResponseDTO:
+      type: array
+      properties:
+        page:
+          type: number
+        data:
+          type: object
+          properties:
+            id:
+              type: string
+            likedAt:
+              type: string
+            profile:
+              type: object
+              properties:
+                username:
+                  type: string
+                displayName:
+                  type: string
+                profilePictureURL:
+                  type: string
+                  nullable: true
+    NotificationDTO:
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            type: string
+          thumbnail:
+            type: string
+          title:
+            type: string
+          subtitle:
+            type: string
+          isSeen:
+            type: boolean
+          type:
+            type: string

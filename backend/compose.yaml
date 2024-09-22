@@ -1,0 +1,46 @@
+services:
+  db:
+    container_name: mirzagram-db-test
+    image: postgres:15-alpine
+    profiles:
+      - db
+      - test
+    env_file:
+      - path: ./.env.local
+        required: true
+    environment:
+      POSTGRES_DB: mirzagram-db
+      POSTGRES_PASSWORD: pass
+      POSTGRES_USER: mirza
+    ports:
+      - 4000:5432
+    networks:
+      - mirza-net
+
+  api:
+    container_name: mirzagram-api-test
+    profiles:
+      - test
+    env_file:
+      - path: ./.env.local
+        required: true
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+    ports:
+      - 3000:3000
+    build:
+      context: .
+      dockerfile: Dockerfile.local
+    networks:
+      - mirza-net
+    depends_on:
+      - db
+
+networks:
+  mirza-net:
+    driver: bridge
+
+volumes:
+  minio_data:
+    driver: local
