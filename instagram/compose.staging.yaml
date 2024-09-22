@@ -1,0 +1,69 @@
+version: "3.8"
+
+name: mirzagram-staging
+services:
+  api:
+    container_name: mirzagram-api-staging
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.staging
+    env_file:
+      - path: ./backend/.env.staging
+        required: true
+    # ports:
+    #   - 3000:3000
+    environment:
+      NODE_ENV: production
+      DB_HOST: db
+      DB_PORT: 5432
+      APP_ENV: staging
+    networks:
+      - mirza-net-staging
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    stdin_open: true
+    tty: true
+    restart: on-failure
+
+  frontend:
+    container_name: mirzagram-front-staging
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.staging
+    environment:
+      VITE_REACT_APP_BASE_URL: http://localhost:8000/api/
+    ports:
+      - 8000:8001
+      - 8002:8002
+    depends_on:
+      - api
+    networks:
+      - mirza-net-staging
+
+  db:
+    image: postgres:15-alpine
+    container_name: mirzagram-db-staging
+    environment:
+      POSTGRES_USER: mirza
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: mirzagram-db
+      PGUSER: mirza
+    networks:
+      - mirza-net-staging
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d mirzagram-db -U mirza"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+    restart: on-failure
+
+networks:
+  mirza-net-staging:
+    driver: bridge
